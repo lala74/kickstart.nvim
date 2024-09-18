@@ -12,3 +12,8 @@ vim.keymap.set('n', '<C-c>', '<Esc>', { noremap = true, silent = true })
 -- Toggle comment
 vim.keymap.set('n', '<C-\\>', '<plug>NERDCommenterToggle', { noremap = true, silent = true })
 vim.keymap.set('v', '<C-\\>', '<plug>NERDCommenterToggle', { noremap = true, silent = true })
+
+-- Searching with telescope
+local builtin = require 'telescope.builtin'
+vim.keymap.set('n', '<C-f>', builtin.live_grep, { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
