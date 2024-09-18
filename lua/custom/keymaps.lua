@@ -13,6 +13,11 @@ vim.keymap.set('n', '<C-c>', '<Esc>', { noremap = true, silent = true })
 vim.keymap.set('n', '<C-\\>', '<plug>NERDCommenterToggle', { noremap = true, silent = true })
 vim.keymap.set('v', '<C-\\>', '<plug>NERDCommenterToggle', { noremap = true, silent = true })
 
+-- Map <leader>w to toggle the 'wrap' option
+vim.keymap.set('n', '<leader>wr', function()
+  vim.wo.wrap = not vim.wo.wrap
+end, { noremap = true, silent = true, desc = 'Toggle Wrap' })
+
 -- Searching with telescope
 local builtin = require 'telescope.builtin'
 vim.keymap.set('n', '<C-f>', builtin.live_grep, { desc = '[S]earch by [G]rep' })
