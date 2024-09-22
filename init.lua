@@ -647,6 +647,8 @@ require('lazy').setup({
       --  You can press `g?` for help in this menu.
       require('mason').setup()
 
+      -- NOTE: DLA - config lsp version for mason to donwload: https://github.com/WhoIsSethDaniel/mason-tool-installer.nvim/blob/main/README.md?plain=1#L53-L60
+      --
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
