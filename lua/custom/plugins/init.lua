@@ -14,7 +14,7 @@ end
 return {
   create_plugin 'ojroques/vim-oscyank',
   create_plugin 'thaerkh/vim-workspace',
-  create_plugin 'fatih/vim-go',
+  --create_plugin 'fatih/vim-go',
   create_plugin 'preservim/nerdcommenter',
   create_plugin 'mtdl9/vim-log-highlighting',
 }
