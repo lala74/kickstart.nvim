@@ -8,6 +8,9 @@ vim.opt.smartcase = true
 vim.opt.wrap = true
 vim.opt.linebreak = true -- wrap will enter the whole word instead of breaking text
 
+-- Show file name in the top of nvim
+vim.opt.showtabline = 2
+
 -- Tab and shift and >>
 vim.opt.tabstop = 4 -- Number of visual spaces that a tab character represents.
 -- For example, if you press 'Tab', it will display as 4 spaces in the file.
