@@ -21,4 +21,5 @@ end, { noremap = true, silent = true, desc = 'Toggle Wrap' })
 -- Searching with telescope
 local builtin = require 'telescope.builtin'
 vim.keymap.set('n', '<C-f>', builtin.live_grep, { desc = '[S]earch by [G]rep' })
-vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
+-- C-p is used for go to next in telescope
+--vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
