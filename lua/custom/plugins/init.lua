@@ -12,9 +12,10 @@ local function create_plugin(plugin_name)
 end
 
 return {
-  create_plugin 'ojroques/vim-oscyank',
-  create_plugin 'thaerkh/vim-workspace',
-  --create_plugin 'fatih/vim-go',
-  create_plugin 'preservim/nerdcommenter',
-  create_plugin 'mtdl9/vim-log-highlighting',
+  create_plugin 'ojroques/vim-oscyank', -- Copy from ssh + tmux + docker to clipboard
+  create_plugin 'thaerkh/vim-workspace', -- Workspace for nvim, open on where you left at
+  --create_plugin 'fatih/vim-go', -- Already have nvim-lspconfig with gopls enabled
+  create_plugin 'preservim/nerdcommenter', -- Toggle comment code
+  create_plugin 'mtdl9/vim-log-highlighting', -- Highlight log file
+  create_plugin 'tpope/vim-fugitive', -- Git blame
 }
