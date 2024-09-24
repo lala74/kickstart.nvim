@@ -24,7 +24,15 @@ return {
 
   -- Workflow
   create_plugin 'ojroques/vim-oscyank', -- Copy from ssh + tmux + docker to clipboard
-  create_plugin 'thaerkh/vim-workspace', -- Workspace for nvim, open on where you left at
   create_plugin 'mtdl9/vim-log-highlighting', -- Highlight log file
   create_plugin 'mg979/vim-visual-multi', -- Testing: Multiple select like vscode
+  {
+    -- Workspace for nvim, open on where you left at
+    'thaerkh/vim-workspace',
+    opts = {},
+    config = function()
+      vim.g.workspace_autocreate = 1 -- autocreate workspace when open new file
+      vim.g.workspace_autosave = 0 -- disable auto save on InsertLeave
+    end,
+  },
 }

@@ -27,7 +27,3 @@ map('n', '<F8>', ':TagbarToggle<CR>', opt_default)
 map('n', '<leader>wr', function()
   vim.wo.wrap = not vim.wo.wrap
 end, { noremap = true, silent = true, desc = 'Toggle Wrap' })
-
--- Searching with telescope
-local builtin = require 'telescope.builtin'
-map('n', '<C-f>', builtin.live_grep, { desc = '[S]earch by [G]rep' })
