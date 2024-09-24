@@ -336,7 +336,7 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
+    --branch = '0.1.x',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -389,7 +389,7 @@ require('lazy').setup({
           wrap_results = true,
           path_display = {
             filename_first = {
-              reverse_directories = false,
+              reverse_directories = false, -- keep the original order
             },
           },
           mappings = {
