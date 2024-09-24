@@ -1,25 +1,33 @@
-vim.keymap.set('n', '<leader>l', ':set hlsearch!<CR>', { noremap = true, silent = true, desc = 'Toggle highlight search' })
+-- NOTE: DLA: C-p not work properly for tmux + docker so should not assign this keymap to any function
+
+local map = vim.keymap.set
+local opt_default = { noremap = true, silent = false }
+
+-- Toggle highlight
+map('n', '<leader>l', ':set hlsearch!<CR>', { noremap = true, silent = true, desc = 'Toggle highlight search' })
 
 -- Map Ctrl-s to save the file in normal and insert mode
-vim.keymap.set('n', '<C-s>', ':w<CR>', { noremap = true, silent = true })
-vim.keymap.set('i', '<C-s>', '<Esc>:w<CR>', { noremap = true, silent = true })
+map('n', '<C-s>', ':w<CR>', opt_default)
+map('i', '<C-s>', '<Esc>:w<CR>', opt_default)
 
-vim.keymap.set('v', '<C-c>', ':OSCYankVisual<CR>', { noremap = true, silent = true })
+-- Copy to clipboard from anywhere
+map('v', '<C-c>', ':OSCYankVisual<CR>', opt_default)
 
 -- Map Ctrl-c to Esc in normal mode
-vim.keymap.set('n', '<C-c>', '<Esc>', { noremap = true, silent = true })
+map('n', '<C-c>', '<Esc>', opt_default)
 
 -- Toggle comment
-vim.keymap.set('n', '<C-\\>', '<plug>NERDCommenterToggle', { noremap = true, silent = true })
-vim.keymap.set('v', '<C-\\>', '<plug>NERDCommenterToggle', { noremap = true, silent = true })
+map('n', '<C-\\>', '<plug>NERDCommenterToggle', opt_default)
+map('v', '<C-\\>', '<plug>NERDCommenterToggle', opt_default)
+
+-- Toggle tagbar, display class, file structure
+map('n', '<F8>', ':TagbarToggle<CR>', opt_default)
 
 -- Map <leader>w to toggle the 'wrap' option
-vim.keymap.set('n', '<leader>wr', function()
+map('n', '<leader>wr', function()
   vim.wo.wrap = not vim.wo.wrap
 end, { noremap = true, silent = true, desc = 'Toggle Wrap' })
 
 -- Searching with telescope
 local builtin = require 'telescope.builtin'
-vim.keymap.set('n', '<C-f>', builtin.live_grep, { desc = '[S]earch by [G]rep' })
--- C-p is used for go to next in telescope
---vim.keymap.set('n', '<C-p>', builtin.find_files, { desc = '[S]earch [F]iles' })
+map('n', '<C-f>', builtin.live_grep, { desc = '[S]earch by [G]rep' })
