@@ -31,7 +31,7 @@ return {
     'thaerkh/vim-workspace',
     opts = {},
     config = function()
-      vim.g.workspace_autocreate = 1 -- autocreate workspace when open new file
+      vim.g.workspace_autocreate = 0 -- don't autocreate workspace when open new file
       vim.g.workspace_autosave = 0 -- disable auto save on InsertLeave
     end,
   },
