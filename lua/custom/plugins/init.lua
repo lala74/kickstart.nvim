@@ -36,15 +36,26 @@ return {
     end,
   },
   {
-    'github/copilot.vim',
+    'zbirenbaum/copilot.lua',
     opts = {},
-    config = function() end,
+    config = function()
+      require('copilot').setup {
+        suggestion = { enabled = false },
+        panel = { enabled = false },
+      }
+    end,
+  },
+  {
+    'zbirenbaum/copilot-cmp',
+    config = function()
+      require('copilot_cmp').setup()
+    end,
   },
   {
     'CopilotC-Nvim/CopilotChat.nvim',
     branch = 'canary',
     dependencies = {
-      { 'github/copilot.vim' }, -- or github/copilot.vim
+      { 'zbirenbaum/copilot.lua' }, -- or github/copilot.vim
       { 'nvim-lua/plenary.nvim' }, -- for curl, log wrapper
     },
     build = 'make tiktoken', -- Only on MacOS or Linux
