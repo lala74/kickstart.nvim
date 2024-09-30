@@ -26,6 +26,9 @@ return {
   create_plugin 'ojroques/vim-oscyank', -- Copy from ssh + tmux + docker to clipboard
   create_plugin 'mtdl9/vim-log-highlighting', -- Highlight log file
   create_plugin 'mg979/vim-visual-multi', -- Testing: Multiple select like vscode
+  create_plugin 'ellisonleao/gruvbox.nvim', -- gruvbox lua
+  --create_plugin 'gruvbox-community/gruvbox', -- gruv box community
+  --create_plugin 'morhetz/gruvbox', -- gruv box origin
   {
     -- Workspace for nvim, open on where you left at
     'thaerkh/vim-workspace',
@@ -35,6 +38,8 @@ return {
       vim.g.workspace_autosave = 0 -- disable auto save on InsertLeave
     end,
   },
+
+  -- AI
   {
     'zbirenbaum/copilot.lua',
     opts = {},
