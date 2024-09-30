@@ -10,10 +10,10 @@ require('lspconfig')['gopls'].setup {}
 
 -- Default options:
 require('gruvbox').setup {
-  terminal_colors = true, -- true: apply gruvbox for intergrated terminal
+  terminal_colors = false, -- true: apply gruvbox for intergrated terminal
   undercurl = true, -- true: undercurl spelling error
   underline = true, -- true: underline for link or ...
-  bold = false, -- false: not bold for function
+  bold = true, -- true: bold for function
   italic = {
     strings = false, -- false: string is not italic
     emphasis = false,
@@ -30,7 +30,7 @@ require('gruvbox').setup {
   contrast = '', -- can be "hard", "soft" or empty string
   palette_overrides = {},
   overrides = {},
-  dim_inactive = false, -- false: do not dim inactive window
+  dim_inactive = false, -- FALSE: do not dim inactive window
   transparent_mode = false, -- false: do not transparent the background
 }
 vim.cmd.colorscheme 'gruvbox'
