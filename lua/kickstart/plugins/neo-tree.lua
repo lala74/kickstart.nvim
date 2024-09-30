@@ -13,13 +13,5 @@ return {
   keys = {
     { '\\', ':Neotree toggle=true reveal=true action=focus<CR>', desc = 'NeoTree reveal', silent = true },
   },
-  opts = {
-    -- filesystem = {
-    --   window = {
-    --     mappings = {
-    --       ['\\'] = 'close_window',
-    --     },
-    --   },
-    -- },
-  },
+  opts = {},
 }
