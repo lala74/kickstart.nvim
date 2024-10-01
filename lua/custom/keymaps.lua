@@ -23,6 +23,10 @@ map('v', '<C-\\>', '<plug>NERDCommenterToggle', opt_default)
 -- Toggle tagbar, display class, file structure
 map('n', '<F8>', ':TagbarToggle<CR>', opt_default)
 
+-- Go to next/previous tab
+map('n', '<Tab>', ':tabnext<CR>', opt_default)
+map('n', '<S-Tab>', ':tabprevious<CR>', opt_default)
+
 -- Map <leader>w to toggle the 'wrap' option
 map('n', '<leader>wr', function()
   vim.wo.wrap = not vim.wo.wrap
