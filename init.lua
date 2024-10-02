@@ -335,7 +335,7 @@ require('lazy').setup({
 
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
-    enabled = false,
+    enabled = false, -- DLA: Disable telescope because using fzf-lua
     event = 'VimEnter',
     branch = '0.1.x',
     dependencies = {
@@ -513,32 +513,32 @@ require('lazy').setup({
             vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
           end
 
-          local builtin = require 'fzf-lua'
+          local fzflua = require 'fzf-lua'
 
           -- Jump to the definition of the word under your cursor.
           --  This is where a variable was first declared, or where a function is defined, etc.
           --  To jump back, press <C-t>.
-          map('gd', builtin.lsp_definitions, '[G]oto [D]efinition')
+          map('gd', fzflua.lsp_definitions, '[G]oto [D]efinition')
 
           -- Find references for the word under your cursor.
-          map('gr', builtin.lsp_references, '[G]oto [R]eferences')
+          map('gr', fzflua.lsp_references, '[G]oto [R]eferences')
 
           -- Jump to the implementation of the word under your cursor.
           --  Useful when your language has ways of declaring types without an actual implementation.
-          map('gi', builtin.lsp_implementations, '[G]oto [I]mplementation')
+          map('gi', fzflua.lsp_implementations, '[G]oto [I]mplementation')
 
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('<leader>D', builtin.lsp_typedefs, 'Type [D]efinition')
+          map('<leader>D', fzflua.lsp_typedefs, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<leader>ds', builtin.lsp_document_symbols, '[D]ocument [S]ymbols')
+          map('<leader>ds', fzflua.lsp_document_symbols, '[D]ocument [S]ymbols')
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>ws', builtin.lsp_live_workspace_symbols, '[W]orkspace [S]ymbols')
+          map('<leader>ws', fzflua.lsp_live_workspace_symbols, '[W]orkspace [S]ymbols')
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
