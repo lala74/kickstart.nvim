@@ -12,7 +12,7 @@ local function create_plugin(plugin_name)
 end
 
 return {
-  require 'custom.plugins.colorscheme',
+  require 'custom.plugins.theme',
   require 'custom.plugins.ai',
 
   -- Git plugin
@@ -40,6 +40,8 @@ return {
       -- log_level = 'debug',
     },
   },
+
+  -- Searching
   {
     'ibhagwan/fzf-lua',
     -- optional for icon support

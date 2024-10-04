@@ -1,4 +1,15 @@
 return {
+  -- Nvim display
+  {
+    -- Status line
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      require('lualine').setup {}
+    end,
+  },
+
+  -- Colorschemes
   {
     'ellisonleao/gruvbox.nvim',
     opts = {},
