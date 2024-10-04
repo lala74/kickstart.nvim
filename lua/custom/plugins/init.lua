@@ -29,13 +29,16 @@ return {
   create_plugin 'mtdl9/vim-log-highlighting', -- Highlight log file
   create_plugin 'mg979/vim-visual-multi', -- Testing: Multiple select like vscode
   {
-    -- Workspace for nvim, open on where you left at
-    'thaerkh/vim-workspace',
-    opts = {},
-    config = function()
-      vim.g.workspace_autocreate = 0 -- don't autocreate workspace when open new file
-      vim.g.workspace_autosave = 0 -- disable auto save on InsertLeave
-    end,
+    'rmagatti/auto-session',
+    lazy = false,
+
+    ---enables autocomplete for opts
+    ---@module "auto-session"
+    ---@type AutoSession.Config
+    opts = {
+      suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
+      -- log_level = 'debug',
+    },
   },
   {
     'ibhagwan/fzf-lua',
@@ -52,13 +55,10 @@ return {
         winopts = {
           preview = {
             layout = 'vertical',
-            vertical = 'up:75%',
+            vertical = 'up:65%',
+            wrap = 'wrap',
             winopts = { number = true },
           },
-        },
-        lsp = {
-          jump_to_single_result = true,
-          jump_to_single_result_action = fzf_actions.file_edit,
         },
       }
 
