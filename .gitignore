@@ -5,3 +5,15 @@ nvim
 
 spell/
 lazy-lock.json
+.cache/
+.undodir/
+Session.vim
+ax-*d*
+axctl
+axctl-v2
+axinit
+codegen
+vendor
+deps/
+go.work*
+go*.mod
