@@ -51,7 +51,6 @@ return {
     config = function()
       -- calling `setup` is optional for customization
       local fzflua = require 'fzf-lua'
-      local fzf_actions = require 'fzf-lua.actions'
       fzflua.setup {
         'telescope',
         winopts = {
