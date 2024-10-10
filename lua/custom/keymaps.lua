@@ -1,4 +1,5 @@
 -- NOTE: DLA: C-p not work properly for tmux + docker so should not assign this keymap to any function
+-- <Tab> is link with <C-i> so should not assign <Tab> to any function. This to make sure <C-i> can jump forward (opposited to <C-o>)
 
 local map = vim.keymap.set
 local opt_default = { noremap = true, silent = false }
@@ -24,7 +25,7 @@ map('v', '<C-\\>', '<plug>NERDCommenterToggle', opt_default)
 map('n', '<F8>', ':TagbarToggle<CR>', opt_default)
 
 -- Go to next/previous tab
-map('n', '<Tab>', ':tabnext<CR>', opt_default)
+--map('n', '<Tab>', ':tabnext<CR>', opt_default)
 map('n', '<S-Tab>', ':tabprevious<CR>', opt_default)
 
 -- Map <leader>w to toggle the 'wrap' option
