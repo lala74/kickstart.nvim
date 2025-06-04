@@ -1,6 +1,7 @@
 return {
   {
     'zbirenbaum/copilot.lua',
+    enabled = false,
     opts = {},
     cmd = 'Copilot',
     event = 'InsertEnter',
@@ -42,6 +43,7 @@ return {
   {
     'CopilotC-Nvim/CopilotChat.nvim',
     branch = 'canary',
+    enabled = false,
     dependencies = {
       { 'zbirenbaum/copilot.lua' }, -- or github/copilot.vim
       { 'nvim-lua/plenary.nvim' }, -- for curl, log wrapper
@@ -57,6 +59,7 @@ return {
   {
     'yetone/avante.nvim',
     event = 'VeryLazy',
+    enabled = false,
     lazy = false,
     version = false, -- set this if you want to always pull the latest change
     opts = {
