@@ -37,7 +37,7 @@ return {
   -- Workflow
   create_plugin 'ojroques/vim-oscyank', -- Copy from ssh + tmux + docker to clipboard
   create_plugin 'mtdl9/vim-log-highlighting', -- Highlight log file
-  create_plugin 'mg979/vim-visual-multi', -- Testing: Multiple select like vscode
+  --create_plugin 'mg979/vim-visual-multi', -- Testing: Multiple select like vscode
   {
     'rmagatti/auto-session',
     lazy = false,
