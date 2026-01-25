@@ -35,7 +35,6 @@
   "nvim-treesitter": { "commit": "86c10df7ef77daf45a0e4a918934bb59083db1e1" },
   "nvim-web-devicons": { "commit": "56f17def81478e406e3a8ec4aa727558e79786f3" },
   "plenary.nvim": { "commit": "2d9b06177a975543726ce5c73fca176cedbffe9d" },
-  "render-markdown.nvim": { "commit": "d20d19fa54965f6eb94558c0b84fe9a942169fb4" },
   "tagbar": { "commit": "d55d454bd3d5b027ebf0e8c75b8f88e4eddad8d8" },
   "telescope-fzf-native.nvim": { "commit": "cf48d4dfce44e0b9a2e19a008d6ec6ea6f01a83b" },
   "telescope.nvim": { "commit": "eae0d8fbde590b0eaa2f9481948cd6fd7dd21656" },

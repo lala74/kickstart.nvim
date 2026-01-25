@@ -13,7 +13,6 @@ end
 
 return {
   require 'custom.plugins.theme',
-  require 'custom.plugins.ai',
 
   -- Git plugin
   create_plugin 'tpope/vim-fugitive', -- :Git blame, ...
@@ -24,15 +23,6 @@ return {
   create_plugin 'preservim/tagbar', -- Display class + variable structure of file
   create_plugin 'preservim/nerdcommenter', -- :NERDCommenterToggle - Toggle comment code
   create_plugin 'fatih/vim-go', -- :NERDCommenterToggle - Toggle comment code
-  --{
-  --'MeanderingProgrammer/render-markdown.nvim',
-  --dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.nvim' }, -- if you use the mini.nvim suite
-  ---- dependencies = { 'nvim-treesitter/nvim-treesitter', 'echasnovski/mini.icons' }, -- if you use standalone mini plugins
-  ---- dependencies = { 'nvim-treesitter/nvim-treesitter', 'nvim-tree/nvim-web-devicons' }, -- if you prefer nvim-web-devicons
-  -----@module 'render-markdown'
-  -----@type render.md.UserConfig
-  --opts = {},
-  --},
 
   -- Workflow
   create_plugin 'ojroques/vim-oscyank', -- Copy from ssh + tmux + docker to clipboard
