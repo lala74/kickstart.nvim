@@ -25,6 +25,9 @@ return {
   {
     'fatih/vim-go',
     config = function() end,
+    init = function()
+      vim.g.go_gopls_enabled = 0 -- managed by vim.lsp.config in settings.lua with full capabilities
+    end,
   },
 
   -- Workflow
