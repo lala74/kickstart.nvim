@@ -15,7 +15,6 @@ return {
       }
     end,
   },
-  { 'stevearc/dressing.nvim', opts = {} }, -- better vim pop up prompt
 
   -- Colorschemes
   {

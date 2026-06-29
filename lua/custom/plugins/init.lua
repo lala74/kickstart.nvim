@@ -22,7 +22,10 @@ return {
   -- Coding
   create_plugin 'preservim/tagbar', -- Display class + variable structure of file
   create_plugin 'preservim/nerdcommenter', -- :NERDCommenterToggle - Toggle comment code
-  create_plugin 'fatih/vim-go', -- :NERDCommenterToggle - Toggle comment code
+  {
+    'fatih/vim-go',
+    config = function() end,
+  },
 
   -- Workflow
   create_plugin 'ojroques/vim-oscyank', -- Copy from ssh + tmux + docker to clipboard
@@ -62,6 +65,7 @@ return {
           },
         },
       }
+      fzflua.register_ui_select()
 
       vim.keymap.set('n', '<leader>sh', fzflua.helptags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', fzflua.keymaps, { desc = '[S]earch [K]eymaps' })
