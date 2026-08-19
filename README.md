@@ -80,23 +80,27 @@ than relying on whatever is on the box.
 
 | Platform | Status |
 | :------- | :----- |
-| macOS 12+, arm64 and x86_64 | supported (`fd` is skipped on x86_64 -- upstream ships no build for it) |
-| Ubuntu 22.04+ / glibc 2.34+, arm64 and x86_64 | supported |
-| Ubuntu 20.04 and older / glibc < 2.34 | **not supported** |
+| macOS 12+, arm64 | supported |
+| macOS 12+, x86_64 | supported; `fd` is skipped, as upstream ships no build for it |
+| Ubuntu 22.04+ (glibc 2.34+), arm64 and x86_64 | supported |
+| Ubuntu 20.04 (glibc 2.31), arm64 and x86_64 | supported |
 
-The official Neovim release binaries are linked against glibc 2.34, so they
-cannot run on Ubuntu 20.04 at all. `setup.sh` detects this up front and stops
-with an explanation rather than failing later. Use a newer distro, a container,
-or build Neovim from source there.
+The main Neovim repo's Linux binaries are linked against glibc 2.34, so they do
+not run on Ubuntu 20.04. Neovim publishes the same releases built against glibc
+2.17 in [`neovim/neovim-releases`](https://github.com/neovim/neovim-releases);
+`setup.sh` detects the system glibc and pulls from there when needed.
 
-Two upstream gaps are worth knowing about, since Mason will report them:
+Some upstream gaps are worth knowing about, since Mason reports them as
+failures. None of them stop the install:
 
-- `clangd` publishes no Linux **arm64** build, so it cannot be installed on
-  arm64 Linux. x86_64 Linux and macOS are fine.
-- `isort` and `black` are built in a virtualenv, so they need more than the bare
-  `python3` binary. On Debian and Ubuntu that means
-  `sudo apt-get install -y python3 python3-venv python3-pip`; `setup.sh` warns
-  when it is missing but does not treat it as fatal.
+- `clangd` publishes no Linux **arm64** build, so it cannot be installed there.
+  x86_64 Linux and macOS are fine.
+- `isort` and `black` now require **Python 3.10+**, so they cannot be installed
+  on Ubuntu 20.04 (Python 3.8). They work from 22.04 onwards.
+- Mason builds those two in a virtualenv, which needs more than the bare
+  `python3` binary. On Debian and Ubuntu:
+  `sudo apt-get install -y python3 python3-venv python3-pip`. `setup.sh` warns
+  when it is missing.
 
 ### Installing by hand
 

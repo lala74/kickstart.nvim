@@ -13,6 +13,11 @@ set -euo pipefail
 # ---------------------------------------------------------------- pinned versions
 
 NVIM_VERSION=v0.12.3
+# The main repo's Linux binaries need glibc 2.34 (Ubuntu 22.04). Neovim also
+# publishes the same releases built against glibc 2.17 in a second repo, which is
+# what older distros such as Ubuntu 20.04 need. Chosen at runtime in preflight.
+NVIM_REPO=neovim/neovim
+NVIM_REPO_OLD_GLIBC=neovim/neovim-releases
 RIPGREP_VERSION=15.2.0
 FD_VERSION=v10.4.2
 FZF_VERSION=v0.74.3
@@ -128,11 +133,8 @@ if [ "$OS" = linux ]; then
   local glibc
   glibc="$(ldd --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+$' || true)"
   if [ -n "$glibc" ] && [ "$(printf '%s\n2.34\n' "$glibc" | sort -V | head -1)" != "2.34" ]; then
-    printf '%serror:%s glibc %s is too old for the official Neovim %s binary (needs 2.34+).\n' \
-      "$C_RED" "$C_RESET" "$glibc" "$NVIM_VERSION" >&2
-    printf '    Ubuntu 20.04 and older cannot run it. Use a newer distro, a container,\n' >&2
-    printf '    or build Neovim from source.\n' >&2
-    exit 1
+    NVIM_REPO="$NVIM_REPO_OLD_GLIBC"
+    info "glibc $glibc is older than 2.34; using the $NVIM_REPO build of Neovim"
   fi
 fi
 
@@ -179,13 +181,18 @@ tmpdir() {
   printf '%s' "$TMPDIR_SETUP"
 }
 
-fetch() { # fetch <url> <dest-file>
+_fetch() { # _fetch <url> <dest-file> -> non-zero on failure
   # A progress bar is helpful interactively and pure noise in a CI log.
   local progress=--progress-bar
   [ -t 1 ] || progress=-sS
-  run curl -fL --retry 3 --retry-delay 2 --connect-timeout 20 "$progress" -o "$2" "$1" \
-    || die "download failed: $1"
+  run curl -fL --retry 3 --retry-delay 2 --connect-timeout 20 "$progress" -o "$2" "$1"
 }
+
+# For things the config cannot work without.
+fetch() { _fetch "$1" "$2" || die "download failed: $1"; }
+
+# For things that only cost a feature if they are missing.
+fetch_optional() { _fetch "$1" "$2"; }
 
 # Records the installed version so a re-run is a no-op instead of a re-download.
 stamp_of() {
@@ -214,13 +221,14 @@ install_single_binary() { # install_single_binary <name> <src-path>
 
 install_nvim() {
   local bin="$OPT/nvim/bin/nvim"
-  if up_to_date nvim "$NVIM_VERSION" "$bin"; then ok "neovim $NVIM_VERSION already installed"; return; fi
+  local want="${NVIM_VERSION} ${NVIM_REPO}"
+  if up_to_date nvim "$want" "$bin"; then ok "neovim $NVIM_VERSION already installed"; return; fi
 
   local asset="nvim-${NVIM_OS}-${NVIM_ARCH}.tar.gz"
-  local url="https://github.com/neovim/neovim/releases/download/${NVIM_VERSION}/${asset}"
+  local url="https://github.com/${NVIM_REPO}/releases/download/${NVIM_VERSION}/${asset}"
   local tmp; tmp="$(tmpdir)"
 
-  info "neovim $NVIM_VERSION ($asset)"
+  info "neovim $NVIM_VERSION ($asset from $NVIM_REPO)"
   fetch "$url" "$tmp/$asset"
   run rm -rf "$OPT/nvim"
   run mkdir -p "$OPT/nvim"
@@ -228,7 +236,7 @@ install_nvim() {
   # Release tarballs are quarantined by Gatekeeper; without this macOS kills nvim.
   if [ "$OS" = macos ]; then run xattr -rc "$OPT/nvim" 2>/dev/null || true; fi
   run ln -sfn "$bin" "$BIN/nvim"
-  set_stamp nvim "$NVIM_VERSION"
+  set_stamp nvim "$want"
   ok "neovim installed"
 }
 
@@ -337,7 +345,12 @@ install_go() {
   local asset="${GO_VERSION}.${GO_OS}-${GO_ARCH}.tar.gz"
   local tmp; tmp="$(tmpdir)"
   info "go $GO_VERSION"
-  fetch "https://go.dev/dl/${asset}" "$tmp/$asset"
+  # go.dev/dl rate-limits and starts answering 503; dl.google.com is the CDN it
+  # redirects to anyway.
+  if ! fetch_optional "https://dl.google.com/go/${asset}" "$tmp/$asset"; then
+    warn "could not download Go; skipping it (gopls will be unavailable)"
+    return 0
+  fi
   run rm -rf "$OPT/go"
   run mkdir -p "$OPT/go"
   run tar -xzf "$tmp/$asset" -C "$OPT/go" --strip-components=1
@@ -356,7 +369,10 @@ install_font() {
   local asset="${NERD_FONT}.zip"
   local tmp; tmp="$(tmpdir)"
   info "$NERD_FONT Nerd Font $NERD_FONT_VERSION"
-  fetch "https://github.com/ryanoasis/nerd-fonts/releases/download/${NERD_FONT_VERSION}/${asset}" "$tmp/$asset"
+  if ! fetch_optional "https://github.com/ryanoasis/nerd-fonts/releases/download/${NERD_FONT_VERSION}/${asset}" "$tmp/$asset"; then
+    warn "could not download the Nerd Font; skipping it"
+    return 0
+  fi
   run mkdir -p "$dest/$NERD_FONT"
   run unzip -oq "$tmp/$asset" -d "$dest/$NERD_FONT" -x 'LICENSE*' 'README*'
   run touch "$dest/.kickstart-${NERD_FONT}"
