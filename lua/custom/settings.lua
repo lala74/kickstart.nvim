@@ -7,6 +7,16 @@ end
 
 vim.lsp.config('gopls', {
   cmd = { 'gopls' },
+  -- `gopls` resolves to a goenv shim, and goenv picks its Go version from the
+  -- nearest go.mod's `go` directive. Inside a vendored dep whose go.mod says
+  -- `go 1.23` that downgrades the toolchain, which then fails the workspace's
+  -- go.work: "go.work requires go >= 1.26.2 (running go 1.23.2)". Pinning
+  -- GOENV_VERSION overrides that per-directory lookup (and it beats a PATH
+  -- prepend, which the shim clobbers on its way to `goenv exec`). GOROOT comes
+  -- from `goenv init`, so this tracks whatever the goenv global version is.
+  cmd_env = vim.env.GOROOT and {
+    GOENV_VERSION = vim.fs.basename(vim.env.GOROOT),
+  } or nil,
   filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
   -- Skip non-file buffers (e.g. fugitive:// blame/blob buffers) so gopls
   -- doesn't choke on non-'file' URI schemes.
