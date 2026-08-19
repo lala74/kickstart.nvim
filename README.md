@@ -1,10 +1,14 @@
 # kickstart.nvim
 
 ## TL;DR
+
+```sh
+git clone git@github.com:lala74/kickstart.nvim.git --branch dla ~/.config/kickstart.nvim
+~/.config/kickstart.nvim/setup.sh
 ```
-# Linux MacOS
-git clone git@github.com:lala74/kickstart.nvim.git --branch dla "${XDG_CONFIG_HOME:-$HOME/.config}"/nvim
-```
+
+That is the whole install. `setup.sh` puts everything under `~/.local`, so it
+needs no `sudo` and no package manager.
 
 ## Introduction
 
@@ -18,101 +22,120 @@ A starting point for Neovim that is:
 
 ## Installation
 
-### Install Neovim
+### What `setup.sh` does
 
-Kickstart.nvim targets *only* the latest
-['stable'](https://github.com/neovim/neovim/releases/tag/stable) and latest
-['nightly'](https://github.com/neovim/neovim/releases/tag/nightly) of Neovim.
-If you are experiencing issues, please make sure you have the latest versions.
+1. Checks the handful of prerequisites it *cannot* install without root, and
+   tells you the exact command to fix them if any are missing.
+2. Downloads pinned, prebuilt binaries into `~/.local/bin`:
+   Neovim, ripgrep, fd, fzf, the tree-sitter CLI, stylua, Node, Go and a
+   Nerd Font. An existing `node` or `go` on `PATH` is reused, but only if it is
+   new enough to be useful -- Node below 18 breaks Mason's `pyright` and
+   `bash-language-server`, and Go below 1.21 cannot build `gopls`. Older ones
+   are shadowed rather than reused.
+3. Adds `~/.local/bin` to `PATH` in your shell rc (guarded, so re-running is safe).
+4. Symlinks the repo to `~/.config/nvim`, backing up anything already there.
+5. Bootstraps plugins **from `lazy-lock.json`**, builds the tree-sitter parsers,
+   and installs the LSP servers and formatters through Mason.
+6. Runs `:checkhealth kickstart` and fails if anything reports an ERROR.
 
-### Install External Dependencies
+It is idempotent: running it again re-downloads nothing that is already at the
+pinned version.
 
-External Requirements:
-- Basic utils: `git`, `make`, `unzip`, C Compiler (`gcc`)
-- [ripgrep](https://github.com/BurntSushi/ripgrep#installation)
-- Clipboard tool (xclip/xsel/win32yank or other depending on platform)
-- A [Nerd Font](https://www.nerdfonts.com/): optional, provides various icons
-  - if you have it set `vim.g.have_nerd_font` in `init.lua` to true
-- Language Setup:
-  - If you want to write Typescript, you need `npm`
-  - If you want to write Golang, you will need `go`
-  - etc.
+```
+Usage: setup.sh [options]
 
-> **NOTE**
-> See [Install Recipes](#Install-Recipes) for additional Windows and Linux specific notes
-> and quick install snippets
+  --no-go       Skip the Go toolchain (gopls will then be unavailable)
+  --no-font     Skip installing the Nerd Font
+  --clean       Wipe existing Neovim data/state/cache before bootstrapping
+  --dry-run     Print what would happen without touching anything
+  -y, --yes     Do not prompt before backing up an existing config
+  -h, --help    Show this help
+```
 
-### Install Kickstart
+Start with `--dry-run` if you want to see the plan before anything is written.
 
-> **NOTE**
-> [Backup](#FAQ) your previous configuration (if any exists)
+### Prerequisites
 
-Neovim's configurations are located under the following paths, depending on your OS:
+`setup.sh` cannot install these itself, because they need root:
 
-| OS | PATH |
-| :- | :--- |
-| Linux, MacOS | `$XDG_CONFIG_HOME/nvim`, `~/.config/nvim` |
-| Windows (cmd)| `%localappdata%\nvim\` |
-| Windows (powershell)| `$env:LOCALAPPDATA\nvim\` |
-
-#### Recommended Step
-
-[Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) this repo
-so that you have your own copy that you can modify, then install by cloning the
-fork to your machine using one of the commands below, depending on your OS.
-
-> **NOTE**
-> Your fork's url will be something like this:
-> `https://github.com/<your_github_username>/kickstart.nvim.git`
-
-You likely want to remove `lazy-lock.json` from your fork's `.gitignore` file
-too - it's ignored in the kickstart repo to make maintenance easier, but it's
-[recommmended to track it in version control](https://lazy.folke.io/usage/lockfile).
-
-#### Clone kickstart.nvim
-> **NOTE**
-> If following the recommended step above (i.e., forking the repo), replace
-> `nvim-lua` with `<your_github_username>` in the commands below
-
-<details><summary> Linux and Mac </summary>
+- `git`, `curl`, `tar`, `unzip`
+- `make` and a C compiler (`cc`/`gcc`/`clang`) — tree-sitter builds every parser
+  from C, so this is not optional
 
 ```sh
-git clone https://github.com/nvim-lua/kickstart.nvim.git "${XDG_CONFIG_HOME:-$HOME/.config}"/nvim
+# Debian / Ubuntu
+sudo apt-get install -y build-essential git curl tar unzip
+
+# macOS
+xcode-select --install
 ```
 
-</details>
+Everything else — including Neovim itself — is downloaded by the script.
 
-<details><summary> Windows </summary>
+### Neovim version
 
-If you're using `cmd.exe`:
+This config requires **Neovim 0.11 or newer** (it uses `vim.lsp.config`,
+`vim.lsp.enable` and the nvim-treesitter v2 API). Distro packages are usually
+far older than that, which is why `setup.sh` installs a pinned Neovim rather
+than relying on whatever is on the box.
 
+### Supported platforms
+
+| Platform | Status |
+| :------- | :----- |
+| macOS 12+, arm64 | supported |
+| macOS 12+, x86_64 | supported; `fd` is skipped, as upstream ships no build for it |
+| Ubuntu 22.04+ (glibc 2.34+), arm64 and x86_64 | supported |
+| Ubuntu 20.04 (glibc 2.31), arm64 and x86_64 | supported |
+
+The main Neovim repo's Linux binaries are linked against glibc 2.34, so they do
+not run on Ubuntu 20.04. Neovim publishes the same releases built against glibc
+2.17 in [`neovim/neovim-releases`](https://github.com/neovim/neovim-releases).
+The tree-sitter CLI has the same problem, and unevenly: its 0.25.x x86_64
+binaries need glibc 2.34 while the arm64 ones need only 2.29. `setup.sh` reads
+the system glibc and picks builds that run on it -- the compatibility Neovim repo
+and tree-sitter 0.24.7 below glibc 2.34. It also checks that the tree-sitter it
+installed can actually start, because a tree-sitter that cannot run shows up much
+later as every parser failing to build.
+
+Some upstream gaps are worth knowing about, since Mason reports them as
+failures. None of them stop the install:
+
+- `clangd` publishes no Linux **arm64** build, so it cannot be installed there.
+  x86_64 Linux and macOS are fine.
+- `isort` and `black` now require **Python 3.10+**, so they cannot be installed
+  on Ubuntu 20.04 (Python 3.8). They work from 22.04 onwards.
+- Mason builds those two in a virtualenv, which needs more than the bare
+  `python3` binary. On Debian and Ubuntu:
+  `sudo apt-get install -y python3 python3-venv python3-pip`. `setup.sh` warns
+  when it is missing.
+
+### Installing by hand
+
+If you would rather not use the script, install the dependencies above plus
+`ripgrep`, `fd`, `fzf`, the `tree-sitter` CLI and `node` (Mason needs it for
+`pyright` and `bashls`), then:
+
+```sh
+git clone git@github.com:lala74/kickstart.nvim.git --branch dla "${XDG_CONFIG_HOME:-$HOME/.config}"/nvim
+nvim --headless "+Lazy! restore" +qa
 ```
-git clone https://github.com/nvim-lua/kickstart.nvim.git "%localappdata%\nvim"
-```
 
-If you're using `powershell.exe`
-
-```
-git clone https://github.com/nvim-lua/kickstart.nvim.git "${env:LOCALAPPDATA}\nvim"
-```
-
-</details>
+> **Use `Lazy! restore`, not a plain start.** On a fresh clone lazy.nvim
+> installs each plugin's current `HEAD`, *not* the commits recorded in
+> `lazy-lock.json`. That mismatch is the single most common reason this config
+> works on one machine and breaks on the next.
 
 ### Post Installation
 
-Start Neovim
+Start Neovim:
 
 ```sh
 nvim
 ```
 
-That's it! Lazy will install all the plugins you have. Use `:Lazy` to view
-current plugin status. Hit `q` to close the window.
-
-Read through the `init.lua` file in your configuration folder for more
-information about extending and exploring Neovim. That also includes
-examples of adding popularly requested plugins.
-
+Use `:Lazy` to view plugin status and `:checkhealth` to confirm the environment
+is sane. Hit `q` to close either window.
 
 ### Getting Started
 
