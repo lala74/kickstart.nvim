@@ -28,7 +28,10 @@ A starting point for Neovim that is:
    tells you the exact command to fix them if any are missing.
 2. Downloads pinned, prebuilt binaries into `~/.local/bin`:
    Neovim, ripgrep, fd, fzf, the tree-sitter CLI, stylua, Node, Go and a
-   Nerd Font. Existing `node`/`go` already on `PATH` are reused, not replaced.
+   Nerd Font. An existing `node` or `go` on `PATH` is reused, but only if it is
+   new enough to be useful -- Node below 18 breaks Mason's `pyright` and
+   `bash-language-server`, and Go below 1.21 cannot build `gopls`. Older ones
+   are shadowed rather than reused.
 3. Adds `~/.local/bin` to `PATH` in your shell rc (guarded, so re-running is safe).
 4. Symlinks the repo to `~/.config/nvim`, backing up anything already there.
 5. Bootstraps plugins **from `lazy-lock.json`**, builds the tree-sitter parsers,

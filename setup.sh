@@ -30,6 +30,11 @@ TREE_SITTER_VERSION_OLD_GLIBC=v0.24.7
 STYLUA_VERSION=v2.5.2
 NODE_VERSION=v24.19.0
 GO_VERSION=go1.26.6
+# A pre-existing toolchain is reused, but only if it is new enough to be useful:
+# Mason's pyright and bash-language-server need a modern Node, and building gopls
+# needs a modern Go. Older ones get shadowed by our own copy.
+NODE_MINIMUM=18.0.0
+GO_MINIMUM=1.21.0
 NERD_FONT_VERSION=v3.5.0
 NERD_FONT=JetBrainsMono
 
@@ -100,6 +105,9 @@ run() {
 }
 
 have() { command -v "$1" >/dev/null 2>&1; }
+
+# version_ge <have> <want>
+version_ge() { [ "$(printf '%s\n%s\n' "$2" "$1" | sort -V | head -1)" = "$2" ]; }
 
 # ---------------------------------------------------------------- platform
 
@@ -330,8 +338,13 @@ install_stylua() {
 install_node() {
   # Mason installs pyright and bashls from npm, so node is not optional.
   if have node && [ ! -e "$OPT/node" ]; then
-    ok "node already on PATH ($(node --version 2>/dev/null)) -- leaving it alone"
-    return
+    local current; current="$(node --version 2>/dev/null | tr -d v)"
+    if [ -n "$current" ] && version_ge "$current" "$NODE_MINIMUM"; then
+      ok "node $current already on PATH -- leaving it alone"
+      return
+    fi
+    warn "node ${current:-unknown} is older than $NODE_MINIMUM, which breaks Mason's"
+    warn "  pyright and bash-language-server; installing $NODE_VERSION alongside it"
   fi
   local bin="$OPT/node/bin/node"
   if up_to_date node "$NODE_VERSION" "$bin"; then ok "node $NODE_VERSION already installed"; return; fi
@@ -352,8 +365,13 @@ install_node() {
 
 install_go() {
   if have go && [ ! -e "$OPT/go" ]; then
-    ok "go already on PATH ($(go version 2>/dev/null | awk '{print $3}')) -- leaving it alone"
-    return
+    local current; current="$(go version 2>/dev/null | awk '{print $3}' | sed 's/^go//')"
+    if [ -n "$current" ] && version_ge "$current" "$GO_MINIMUM"; then
+      ok "go $current already on PATH -- leaving it alone"
+      return
+    fi
+    warn "go ${current:-unknown} is older than $GO_MINIMUM and cannot build gopls;"
+    warn "  installing $GO_VERSION alongside it"
   fi
   local bin="$OPT/go/bin/go"
   if up_to_date go "$GO_VERSION" "$bin"; then ok "go $GO_VERSION already installed"; return; fi
