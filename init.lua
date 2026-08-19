@@ -698,9 +698,13 @@ require('lazy').setup({
         vim.lsp.config(server_name, server)
       end
 
-      -- Installed servers are enabled automatically (`automatic_enable` defaults
-      -- to true); what to install is driven by mason-tool-installer above.
-      require('mason-lspconfig').setup {}
+      -- Only enable the servers listed above. The default (`automatic_enable =
+      -- true`) enables everything Mason installed that lspconfig has a config
+      -- for, which includes stylua -- it ships an LSP mode that then fails to
+      -- start and reports an error on every Lua buffer.
+      require('mason-lspconfig').setup {
+        automatic_enable = vim.tbl_keys(servers),
+      }
     end,
   },
 

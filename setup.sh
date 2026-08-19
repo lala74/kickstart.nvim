@@ -21,10 +21,12 @@ NVIM_REPO_OLD_GLIBC=neovim/neovim-releases
 RIPGREP_VERSION=15.2.0
 FD_VERSION=v10.4.2
 FZF_VERSION=v0.74.3
-# 0.26.x release binaries are linked against glibc 2.39 (Ubuntu 24.04), so they
-# refuse to start on anything older. 0.25.10 needs only glibc 2.29 and builds
-# every parser this config uses -- verified on Ubuntu 20.04 and 22.04.
+# 0.26.x release binaries need glibc 2.39 (Ubuntu 24.04), and the 0.25.x x86_64
+# binaries need 2.34 (Ubuntu 22.04) even though the arm64 ones only need 2.29.
+# 0.24.7 needs 2.29 on both architectures and still builds every parser this
+# config uses. Picked by glibc version in preflight.
 TREE_SITTER_VERSION=v0.25.10
+TREE_SITTER_VERSION_OLD_GLIBC=v0.24.7
 STYLUA_VERSION=v2.5.2
 NODE_VERSION=v24.19.0
 GO_VERSION=go1.26.6
@@ -134,7 +136,9 @@ if [ "$OS" = linux ]; then
   glibc="$(ldd --version 2>/dev/null | head -1 | grep -oE '[0-9]+\.[0-9]+$' || true)"
   if [ -n "$glibc" ] && [ "$(printf '%s\n2.34\n' "$glibc" | sort -V | head -1)" != "2.34" ]; then
     NVIM_REPO="$NVIM_REPO_OLD_GLIBC"
-    info "glibc $glibc is older than 2.34; using the $NVIM_REPO build of Neovim"
+    TREE_SITTER_VERSION="$TREE_SITTER_VERSION_OLD_GLIBC"
+    info "glibc $glibc is older than 2.34; using builds that still support it"
+    info "  neovim from $NVIM_REPO, tree-sitter $TREE_SITTER_VERSION"
   fi
 fi
 
@@ -295,6 +299,17 @@ install_tree_sitter() {
   fetch "https://github.com/tree-sitter/tree-sitter/releases/download/${TREE_SITTER_VERSION}/${asset}" "$tmp/$asset"
   run gzip -df "$tmp/$asset"
   install_single_binary tree-sitter "$tmp/tree-sitter-${TS_OS}-${TS_ARCH}"
+
+  # A tree-sitter that installs but cannot start makes every parser fail to
+  # build much later, so check it here where the cause is still obvious.
+  if [ "$DRY_RUN" != 1 ] && ! "$BIN/tree-sitter" --version >/dev/null 2>&1; then
+    printf '%serror:%s the tree-sitter %s binary cannot run here:\n' \
+      "$C_RED" "$C_RESET" "$TREE_SITTER_VERSION" >&2
+    "$BIN/tree-sitter" --version 2>&1 >/dev/null | head -3 >&2 || true
+    printf '    Without it no tree-sitter parser can be built.\n' >&2
+    exit 1
+  fi
+
   set_stamp tree-sitter "$TREE_SITTER_VERSION"
   ok "tree-sitter installed"
 }

@@ -87,8 +87,13 @@ than relying on whatever is on the box.
 
 The main Neovim repo's Linux binaries are linked against glibc 2.34, so they do
 not run on Ubuntu 20.04. Neovim publishes the same releases built against glibc
-2.17 in [`neovim/neovim-releases`](https://github.com/neovim/neovim-releases);
-`setup.sh` detects the system glibc and pulls from there when needed.
+2.17 in [`neovim/neovim-releases`](https://github.com/neovim/neovim-releases).
+The tree-sitter CLI has the same problem, and unevenly: its 0.25.x x86_64
+binaries need glibc 2.34 while the arm64 ones need only 2.29. `setup.sh` reads
+the system glibc and picks builds that run on it -- the compatibility Neovim repo
+and tree-sitter 0.24.7 below glibc 2.34. It also checks that the tree-sitter it
+installed can actually start, because a tree-sitter that cannot run shows up much
+later as every parser failing to build.
 
 Some upstream gaps are worth knowing about, since Mason reports them as
 failures. None of them stop the install:
