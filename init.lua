@@ -90,7 +90,13 @@ P.S. You can delete this when you're done too. It's your config now! :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
-vim.env.PATH = vim.env.HOME .. '/.cargo/bin:' .. vim.env.PATH
+-- Make locally-installed tools (see setup.sh) visible to Neovim even when it
+-- is launched from a GUI or a shell that never sourced the user's rc file.
+for _, dir in ipairs { vim.env.HOME .. '/.local/bin', vim.env.HOME .. '/.cargo/bin' } do
+  if (vim.uv or vim.loop).fs_stat(dir) then
+    vim.env.PATH = dir .. ':' .. vim.env.PATH
+  end
+end
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
@@ -118,6 +124,27 @@ vim.opt.showmode = false
 --  See `:help 'clipboard'`
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
+
+  -- A remote box usually has no clipboard provider at all (no pbcopy/xclip/xsel/
+  -- wl-copy), so every yank errors out. Fall back to OSC 52, which hands the text
+  -- to whichever terminal we ssh'd in from.
+  local has_provider = false
+  for _, exe in ipairs { 'pbcopy', 'xclip', 'xsel', 'wl-copy' } do
+    has_provider = has_provider or vim.fn.executable(exe) == 1
+  end
+  if vim.env.SSH_TTY and not has_provider then
+    local osc52 = require 'vim.ui.clipboard.osc52'
+    -- Terminals rarely answer the OSC 52 read query, so paste reads the local
+    -- register instead of hanging on a reply that never comes.
+    local paste = function()
+      return { vim.fn.split(vim.fn.getreg '', '\n'), vim.fn.getregtype '' }
+    end
+    vim.g.clipboard = {
+      name = 'OSC 52',
+      copy = { ['+'] = osc52.copy '+', ['*'] = osc52.copy '*' },
+      paste = { ['+'] = paste, ['*'] = paste },
+    }
+  end
 end)
 
 -- Enable break indent
@@ -197,12 +224,14 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 
 -- Highlight when yanking (copying) text
 --  Try it with `yap` in normal mode
---  See `:help vim.highlight.on_yank()`
+--  See `:help vim.hl.on_yank()`
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
-    vim.highlight.on_yank()
+    -- `vim.highlight` is deprecated in favour of `vim.hl` as of Neovim 0.12.
+    local hl = vim.hl or vim.highlight
+    hl.on_yank()
   end,
 })
 
@@ -655,21 +684,23 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'gopls', -- Configured in `custom.settings`, but never installed by it
+        'isort', -- Used by conform for Python
+        'black', -- Used by conform for Python
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
-      require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
-      }
+      -- mason-lspconfig v2 dropped the `handlers` option, so servers are configured
+      -- through `vim.lsp.config` directly. The `*` entry is the wildcard every
+      -- server inherits, which is where the nvim-cmp capabilities belong.
+      vim.lsp.config('*', { capabilities = capabilities })
+      for server_name, server in pairs(servers) do
+        vim.lsp.config(server_name, server)
+      end
+
+      -- Installed servers are enabled automatically (`automatic_enable` defaults
+      -- to true); what to install is driven by mason-tool-installer above.
+      require('mason-lspconfig').setup {}
     end,
   },
 
@@ -897,7 +928,10 @@ require('lazy').setup({
     lazy = false, -- v2 does not support lazy-loading
     build = ':TSUpdate',
     config = function()
-      require('nvim-treesitter').install({ 'c', 'diff', 'go', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'toml', 'vim', 'vimdoc' })
+      -- Exposed as a global so setup.sh can compile these ahead of time in a
+      -- headless run rather than leaving the first interactive start to do it.
+      vim.g.kickstart_ts_parsers = { 'c', 'diff', 'go', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'toml', 'vim', 'vimdoc' }
+      require('nvim-treesitter').install(vim.g.kickstart_ts_parsers)
     end,
     -- Highlighting/indent are now built into neovim 0.12+ — no opts needed.
     -- Additional modules: nvim-treesitter-context, nvim-treesitter-textobjects
