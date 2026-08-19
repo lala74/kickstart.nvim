@@ -8,7 +8,14 @@ end
 vim.lsp.config('gopls', {
   cmd = { 'gopls' },
   filetypes = { 'go', 'gomod', 'gowork', 'gotmpl' },
-  root_markers = { 'go.work', 'go.mod', '.git' },
+  -- Skip non-file buffers (e.g. fugitive:// blame/blob buffers) so gopls
+  -- doesn't choke on non-'file' URI schemes.
+  root_dir = function(bufnr, on_dir)
+    if vim.bo[bufnr].buftype ~= '' then
+      return
+    end
+    on_dir(vim.fs.root(bufnr, { 'go.work', 'go.mod', '.git' }))
+  end,
   capabilities = capabilities,
   init_options = {
     semanticTokens = true,
